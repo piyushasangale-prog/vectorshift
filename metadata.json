@@ -1,14 +1,6 @@
 {
-  "name": "GradPrep",
-  "description": "A comprehensive student guidance platform bridging the gap between academics and career success with personalized roadmaps, exam prep, and placement resources.",
-  "requestFramePermissions": [
-    "camera",
-    "microphone",
-    "geolocation"
-  ],
-  "majorCapabilities": [
-    "AI Recommendations",
-    "Progress Tracking",
-    "Roadmap Management"
-  ]
+  "name": "Peer Mentor Listing",
+  "description": "A modern mentor listing webpage showing college seniors as mentors, with filtering by domain.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
 }

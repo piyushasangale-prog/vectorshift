@@ -1,147 +1,337 @@
 import { useState } from 'react';
+import { Search, MapPin, Briefcase, Award, Code2, BookOpen, UserPlus, Code, Terminal, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Home as HomeIcon, 
-  Map as RoadmapIcon, 
-  BookOpen, 
-  Briefcase, 
-  Layout, 
-  Calendar, 
-  Compass, 
-  ChevronRight,
-  Target,
-  BarChart3,
-  Menu,
-  X,
-  Sparkles
-} from 'lucide-react';
-import { Section } from './types';
-import { cn } from './lib/utils';
 
-// Sub-components (could be moved to separate files later)
-import Hero from './components/Hero';
-import Roadmap from './components/Roadmap';
-import Exams from './components/Exams';
-import Placement from './components/Placement';
-import Projects from './components/Projects';
-import Planner from './components/Planner';
-import Career from './components/Career';
+// --- MOCK DATA ---
+const mentors = [
+  {
+    id: 1,
+    name: "Rahul Sharma",
+    image: "https://picsum.photos/seed/rahul/150/150",
+    yearRole: "3rd Year CSE",
+    domain: "DSA",
+    strongArea: "Dynamic Programming, Graphs",
+    experience: "Solved 400+ on LeetCode, ICPC Regionalist",
+    achievements: "Google Summer of Code '24, HackTheNorth Finalist",
+    projects: ["Algorithm Visualizer", "Compiler Design Lab"],
+    leetcode: "https://leetcode.com",
+    codechef: "https://codechef.com",
+  },
+  {
+    id: 2,
+    name: "Neha Kapoor",
+    image: "https://picsum.photos/seed/neha/150/150",
+    yearRole: "3rd Year IT",
+    domain: "Web Dev",
+    strongArea: "React, Node.js, System Design",
+    experience: "SDE Intern @ Amazon, Built 10+ Fullstack Apps",
+    achievements: "SIH 2023 Winner, Web Dev Club Lead",
+    projects: ["E-commerce MERN App", "Real-time Chat with WebSockets"],
+    leetcode: "https://leetcode.com",
+    codechef: "https://codechef.com",
+  },
+  {
+    id: 3,
+    name: "Aman Gupta",
+    image: "https://picsum.photos/seed/aman/150/150",
+    yearRole: "2nd Year CSE",
+    domain: "AI/ML",
+    strongArea: "Computer Vision, PyTorch",
+    experience: "Deep Learning Researcher @ College Lab",
+    achievements: "Kaggle Expert, Published paper on CNNs",
+    projects: ["Sign Language Detector", "Stock Predictor"],
+    leetcode: "https://leetcode.com",
+    codechef: "https://codechef.com",
+  },
+  {
+    id: 4,
+    name: "Priya Singh",
+    image: "https://picsum.photos/seed/priya/150/150",
+    yearRole: "3rd Year ECE",
+    domain: "Core Subjects",
+    strongArea: "OS, DBMS, Computer Networks",
+    experience: "Teaching Assistant for OS Course",
+    achievements: "9.8 CGPA, Top Performer in Core CS",
+    projects: ["Custom Shell in C", "Distributed Key-Value Store"],
+    leetcode: "https://leetcode.com",
+    codechef: null,
+  },
+  {
+    id: 5,
+    name: "Vikram Das",
+    image: "https://picsum.photos/seed/vikram/150/150",
+    yearRole: "2nd Year IT",
+    domain: "Web Dev",
+    strongArea: "Frontend, UI/UX, Tailwind",
+    experience: "Freelance Web Developer, 5+ Clients",
+    achievements: "CSS Design Award Winner, Speaker at TechFest",
+    projects: ["Portfolio Creator Template", "College Fest Website"],
+    leetcode: null,
+    codechef: "https://codechef.com",
+  },
+  {
+    id: 6,
+    name: "Simran Kaur",
+    image: "https://picsum.photos/seed/simran/150/150",
+    yearRole: "3rd Year CSE",
+    domain: "DSA",
+    strongArea: "Trees, Math, Greedy Algoriths",
+    experience: "Solved 500+ problems, Competitive Programmer",
+    achievements: "Codeforces Specialist, Meta Hacker Cup R2",
+    projects: ["CP Template Library", "Math Solver Utility"],
+    leetcode: "https://leetcode.com",
+    codechef: "https://codechef.com",
+  }
+];
+
+const domains = ["All", "DSA", "Web Dev", "AI/ML", "Core Subjects"];
+
+const domainColors: Record<string, string> = {
+  "DSA": "bg-blue-100 text-blue-700 border-blue-200",
+  "Web Dev": "bg-emerald-100 text-emerald-700 border-emerald-200",
+  "AI/ML": "bg-purple-100 text-purple-700 border-purple-200",
+  "Core Subjects": "bg-amber-100 text-amber-700 border-amber-200",
+};
 
 export default function App() {
-  const [activeSection, setActiveSection] = useState<Section>('home');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeDomain, setActiveDomain] = useState("All");
 
-  const navItems = [
-    { id: 'home', label: 'Home', icon: HomeIcon },
-    { id: 'roadmap', label: 'Roadmap', icon: RoadmapIcon },
-    { id: 'exams', label: 'Exams', icon: BookOpen },
-    { id: 'placement', label: 'Placement', icon: Briefcase },
-    { id: 'projects', label: 'Projects', icon: Layout },
-    { id: 'planner', label: 'Planner', icon: Calendar },
-    { id: 'career', label: 'Career', icon: Compass },
-  ];
+  const filteredMentors = mentors.filter(mentor => {
+    const matchesSearch = mentor.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          mentor.strongArea.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesDomain = activeDomain === "All" || mentor.domain === activeDomain;
+    return matchesSearch && matchesDomain;
+  });
 
   return (
-    <div className="min-h-screen selection:bg-indigo-100 flex flex-col md:flex-row">
-      {/* Mobile Header */}
-      <header className="md:hidden flex items-center justify-between p-4 sticky top-0 bg-white/70 backdrop-blur-md z-50 border-b border-[#E5E7EB]/50">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#4F46E5] rounded flex items-center justify-center text-white font-bold">G</div>
-          <span className="font-display font-bold text-lg tracking-tight text-[#4F46E5]">GradPrep</span>
+    <div className="min-h-screen bg-[#f8fafc] font-sans pb-20">
+      
+      {/* Header Section */}
+      <header className="bg-white border-b border-slate-200 pt-16 pb-8 px-6 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-50/50 to-purple-50/50 z-0 pointer-events-none" />
+        
+        <div className="max-w-7xl mx-auto relative z-10 flex flex-col items-center text-center">
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-sm font-medium mb-6"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+            </span>
+            Peer Mentorship Program
+          </motion.div>
+          
+          <motion.h1 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-4"
+          >
+            Learn from your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Seniors</span>
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="max-w-2xl text-lg text-slate-500 mb-10"
+          >
+            Connect with 2nd and 3rd year students who have been in your shoes. Get guidance on DSA, projects, internships, and core subjects.
+          </motion.p>
+          
+          {/* Search and Filters */}
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="w-full max-w-3xl flex flex-col md:flex-row gap-4 mb-4"
+          >
+            <div className="relative flex-1">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-slate-400" />
+              </div>
+              <input
+                type="text"
+                className="block w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-shadow"
+                placeholder="Search mentors by name or skill (e.g. React, DP)..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </motion.div>
+          
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="flex flex-wrap justify-center gap-2 max-w-3xl"
+          >
+            {domains.map((domain) => (
+              <button
+                key={domain}
+                onClick={() => setActiveDomain(domain)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border ${
+                  activeDomain === domain
+                    ? 'bg-slate-800 text-white border-slate-800 shadow-md'
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                }`}
+              >
+                {domain}
+              </button>
+            ))}
+          </motion.div>
         </div>
-        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 text-[#6B7280]">
-          {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-        </button>
       </header>
 
-      {/* Navigation Sidebar */}
-      <nav className={cn(
-        "fixed md:sticky top-0 h-screen glass-sidebar flex-col py-8 px-5 transition-all z-40 w-[260px] md:flex shrink-0",
-        isSidebarOpen ? "left-0" : "-left-[260px] md:left-0"
-      )}>
-        <div className="hidden md:flex items-center gap-2 mb-12 px-3 cursor-pointer group" onClick={() => setActiveSection('home')}>
-          <div className="w-9 h-9 bg-[#4F46E5] rounded-[8px] flex items-center justify-center text-white font-black group-hover:rotate-6 transition-transform">G</div>
-          <span className="font-display font-extrabold text-2xl tracking-tight text-[#4F46E5]">GradPrep</span>
-        </div>
-
-        <div className="space-y-1.5">
-          {navItems.map((item) => {
-            const isActive = activeSection === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setActiveSection(item.id as Section);
-                  setIsSidebarOpen(false);
-                }}
-                className={cn(
-                  "w-full flex items-center gap-3 px-4 py-3 rounded-[12px] transition-colors text-sm font-semibold relative group",
-                  isActive ? "text-[#4F46E5]" : "text-[#6B7280] hover:text-[#1F2937]"
-                )}
-              >
-                {isActive && (
-                  <motion.div
-                    layoutId="activePill"
-                    className="absolute inset-0 bg-[#EEF2FF] rounded-[12px] -z-10"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                <item.icon size={18} className={cn("transition-transform group-hover:scale-110", isActive && "text-[#4F46E5]")} />
-                {item.label}
-              </button>
-            );
-          })}
-        </div>
-
-          <div className="mt-auto px-1">
-            <button 
-              onClick={() => setActiveSection('career')}
-              className="w-full bg-[#4F46E5] text-white py-3 rounded-[12px] text-sm font-semibold shadow-[0_4px_12px_rgba(79,70,229,0.25)] hover:bg-[#4338CA] transition-all flex items-center justify-center gap-2 group"
-            >
-              Get Plan <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
-            </button>
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-6 pt-12">
+        <div className="mb-8 flex justify-between items-end">
+          <div>
+            <h2 className="text-xl font-semibold text-slate-800">Available Mentors</h2>
+            <p className="text-sm text-slate-500 mt-1">Showing {filteredMentors.length} results</p>
           </div>
-        </nav>
+        </div>
 
-        {/* Main Content Area */}
-        <main className="flex-1 min-w-0 h-screen overflow-y-auto">
-          <div className="max-w-[1200px] mx-auto px-6 md:px-10 py-10">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeSection}
-                initial={{ opacity: 0, y: 15, filter: 'blur(10px)' }}
-                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                exit={{ opacity: 0, y: -15, filter: 'blur(10px)' }}
-                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              >
-                {activeSection === 'home' && <Hero onNavigate={setActiveSection} />}
-                {activeSection === 'roadmap' && <Roadmap />}
-                {activeSection === 'exams' && <Exams />}
-                {activeSection === 'placement' && <Placement />}
-                {activeSection === 'projects' && <Projects />}
-                {activeSection === 'planner' && <Planner />}
-                {activeSection === 'career' && <Career />}
-              </motion.div>
+        {filteredMentors.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <AnimatePresence>
+              {filteredMentors.map((mentor) => (
+                <motion.div
+                  layout
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  key={mentor.id}
+                  className="bg-white rounded-3xl border border-slate-100 p-6 flex flex-col shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 overflow-hidden relative group"
+                >
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-bl-full -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  
+                  {/* Card Header: Profile Info */}
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <img 
+                          src={mentor.image} 
+                          alt={mentor.name} 
+                          className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm"
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-400 border-2 border-white rounded-full"></div>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-slate-900 text-lg">{mentor.name}</h3>
+                        <p className="text-sm text-slate-500 font-medium">{mentor.yearRole}</p>
+                      </div>
+                    </div>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${domainColors[mentor.domain] || 'bg-slate-100 text-slate-700 border-slate-200'}`}>
+                      {mentor.domain}
+                    </span>
+                  </div>
+
+                  {/* Card Body: Details */}
+                  <div className="flex-1 space-y-5">
+                    
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+                        <Code2 className="w-3.5 h-3.5" /> Strong Area
+                      </div>
+                      <p className="text-sm text-slate-700 font-medium">{mentor.strongArea}</p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+                        <Briefcase className="w-3.5 h-3.5" /> Experience
+                      </div>
+                      <p className="text-sm text-slate-600 leading-snug">{mentor.experience}</p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+                        <Award className="w-3.5 h-3.5" /> Achievements
+                      </div>
+                      <p className="text-sm text-slate-600 leading-snug">{mentor.achievements}</p>
+                    </div>
+
+                     <div className="space-y-2">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+                        <BookOpen className="w-3.5 h-3.5" /> Top Projects
+                      </div>
+                      <ul className="text-sm text-slate-600 space-y-1.5">
+                        {mentor.projects.map((project, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-1.5 shrink-0" />
+                            <span className="leading-snug">{project}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                  </div>
+
+                  {/* Card Footer: Actions */}
+                  <div className="mt-8 pt-5 border-t border-slate-100">
+                    <div className="grid grid-cols-2 gap-3">
+                      <button className="flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white py-2.5 px-4 rounded-xl text-sm font-medium transition-colors col-span-2">
+                        <UserPlus className="w-4 h-4" /> Request Mentorship
+                      </button>
+                      
+                      {mentor.leetcode && (
+                        <a 
+                          href={mentor.leetcode}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center justify-center gap-1.5 bg-slate-50 hover:bg-orange-50 text-slate-600 hover:text-orange-600 py-2.5 px-3 rounded-xl text-sm font-medium transition-colors border border-slate-200 hover:border-orange-200"
+                        >
+                          <Code className="w-4 h-4" /> LeetCode
+                        </a>
+                      )}
+                      
+                      {mentor.codechef && (
+                        <a 
+                          href={mentor.codechef}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center justify-center gap-1.5 bg-slate-50 hover:bg-amber-50 text-slate-600 hover:text-amber-700 py-2.5 px-3 rounded-xl text-sm font-medium transition-colors border border-slate-200 hover:border-amber-200"
+                        >
+                          <Terminal className="w-4 h-4" /> CodeChef
+                        </a>
+                      )}
+
+                      {!mentor.leetcode && mentor.codechef && (
+                         <div className="col-span-1 border border-dashed border-slate-200 rounded-xl bg-slate-50/50 flex items-center justify-center text-xs text-slate-400">
+                           No LC Profile
+                         </div>
+                      )}
+                      {!mentor.codechef && mentor.leetcode && (
+                        <div className="col-span-1 border border-dashed border-slate-200 rounded-xl bg-slate-50/50 flex items-center justify-center text-xs text-slate-400">
+                           No CC Profile
+                         </div>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
             </AnimatePresence>
           </div>
-        </main>
-
-        {isSidebarOpen && (
-          <div 
-            className="fixed inset-0 bg-black/10 backdrop-blur-sm z-30 md:hidden"
-            onClick={() => setIsSidebarOpen(false)}
-          />
+        ) : (
+          <div className="py-20 text-center flex flex-col items-center">
+            <div className="bg-slate-100 w-20 h-20 rounded-full flex items-center justify-center mb-4">
+              <Search className="w-8 h-8 text-slate-400" />
+            </div>
+            <h3 className="text-lg font-medium text-slate-900">No mentors found</h3>
+            <p className="text-slate-500 mt-2 max-w-sm mx-auto">We couldn't find any mentors matching your search. Try adjusting your filters or search terms.</p>
+            <button 
+              onClick={() => {setSearchTerm(""); setActiveDomain("All");}}
+              className="mt-6 text-blue-600 font-medium hover:text-blue-700 flex items-center gap-1"
+            >
+              Clear all filters <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
         )}
-
-      {/* Floating Action for Tracker */}
-      <motion.button 
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        className="fixed bottom-8 right-8 w-14 h-14 bg-black text-white rounded-full flex items-center justify-center shadow-2xl z-50 group overflow-hidden"
-      >
-        <span className="absolute inset-0 bg-[#4F46E5] translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-        <BarChart3 className="relative z-10" />
-      </motion.button>
+      </main>
     </div>
   );
 }
